@@ -1,6 +1,6 @@
 # ChronoPulse for Windows
 
-A lightweight, offline-first Windows desktop screen-time tracker and dual-profile telemetry dashboard built in Python.
+A lightweight, offline-first Windows desktop screen-time tracker and multi-profile telemetry dashboard built in Python.
 
 ## Key Features
 - **Profile Selector on Startup:** Prompts users to select their profile on boot before tracking begins.
@@ -39,7 +39,7 @@ ChronoPulse/
 
 1. **Clone or download this repository:**
    ```bat
-   git clone [https://github.com/alakhsatsangi/ChronoPulse.git](https://github.com/alakhsatsangi/ChronoPulse.git)
+   git clone https://github.com/alakhsatsangi/ChronoPulse.git
    cd ChronoPulse
    ```
 
@@ -49,30 +49,7 @@ ChronoPulse/
    ```
    *(Installs `pywin32`, `psutil`, `pystray`, and `pillow`.)*
 
-3. **Customize User Profiles (Optional):**
-   Open `screen_tracker.py` and edit the `USERS` list near the top to set your own profile names, initials, and accent colors:
-   ```python
-   USERS = [
-       {
-           "name": "User 1",
-           "initial": "1",
-           "tag": "Primary Profile",
-           "accent": "#2563EB",
-           "badge_bg": "#1E3A8A",
-           "badge_fg": "#93C5FD",
-       },
-       {
-           "name": "User 2",
-           "initial": "2",
-           "tag": "Secondary Profile",
-           "accent": "#EAB308",
-           "badge_bg": "#422006",
-           "badge_fg": "#FFEE00",
-       },
-   ]
-   ```
-
-4. **Run a Quick Test:**
+3. **Run a Quick Test:**
    - **With console output (for verification):**
      ```bat
      python screen_tracker.py
@@ -85,7 +62,47 @@ ChronoPulse/
 
 ---
 
-## 3. Set Up Custom Local URL (`http://chronopulse.local`)
+## 3. Adding or Customizing User Profiles
+
+ChronoPulse comes configured with 2 profiles (`Work` and `Personal`), and you can rename them or add a 3rd, 4th, or 5th user anytime.
+
+### Edit or Add a User in `USERS`
+Open `screen_tracker.py` and locate the `USERS` list near the top of the file (around line 29). Rename existing profiles or append a new dictionary block for each additional user:
+
+```python
+USERS = [
+    {
+        "name": "Work",
+        "initial": "1",
+        "tag": "Primary Profile",
+        "accent": "#2563EB",
+        "badge_bg": "#1E3A8A",
+        "badge_fg": "#93C5FD",
+    },
+    {
+        "name": "Personal",
+        "initial": "2",
+        "tag": "Secondary Profile",
+        "accent": "#EAB308",
+        "badge_bg": "#422006",
+        "badge_fg": "#FFEE00",
+    },
+    {
+        "name": "Kids",
+        "initial": "3",
+        "tag": "Guest Profile",
+        "accent": "#10B981",
+        "badge_bg": "#064E3B",
+        "badge_fg": "#6EE7B7",
+    },
+]
+```
+
+**Restart ChronoPulse** (right-click the system tray icon → **Exit Completely**, then relaunch) to load the new user profile.
+
+---
+
+## 4. Set Up Custom Local URL (`http://chronopulse.local`)
 
 ChronoPulse binds its web dashboard to dedicated loopback IP **`127.0.0.2`** on port **`80`** (falling back to port `8765` if port `80` requires elevated permissions). Using `127.0.0.2` leaves standard `localhost` (`127.0.0.1`) completely untouched for your other local web development projects.
 
@@ -109,7 +126,7 @@ ChronoPulse binds its web dashboard to dedicated loopback IP **`127.0.0.2`** on 
 
 ---
 
-## 4. Auto-Start Silently When Windows Boots (`shell:startup`)
+## 5. Auto-Start Silently When Windows Boots (`shell:startup`)
 
 > **Note:** Do **not** place `screen_tracker.py` directly inside the Startup folder, or Windows may open it in your code editor (such as VS Code) instead of executing it. Use a `.bat` launcher instead.
 
@@ -134,7 +151,7 @@ ChronoPulse binds its web dashboard to dedicated loopback IP **`127.0.0.2`** on 
 
 ---
 
-## 5. Daily Controls & Data Backup
+## 6. Daily Controls & Data Backup
 
 - **Hide to System Tray:** Click **`✕`** on the selector or **`—`** on the floating tracker card to hide the window to the **ChronoPulse** icon in your bottom-right System Tray while tracking continues in the background.
 - **Reopen or Switch Profile:** Click or right-click the **ChronoPulse** System Tray icon anytime to reopen the tracker, launch the dashboard, or switch users.

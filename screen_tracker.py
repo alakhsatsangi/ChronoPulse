@@ -19,25 +19,27 @@ import pystray
 # BRANDING & CONFIGURATION
 # ==========================================
 APP_NAME = "ChronoPulse"
-APP_TAGLINE = "Windows Dual-Profile Screen Telemetry"
+APP_TAGLINE = "Windows Multi-Profile Screen Telemetry"
 HOST_IP = "127.0.0.2"
 PORT = 80
 CUSTOM_URL = "http://chronopulse.local"
 IDLE_THRESHOLD_SECONDS = 180  # Pause tracking after 3 mins of inactivity
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "screentime.db")
 
+# Add, remove, or rename as many users as you want here.
+# Popup height, KPI cards, filter tabs, and charts scale automatically.
 USERS = [
     {
-        "name": "User 1",
-        "initial": "1",
+        "name": "Work",
+        "initial": "W",
         "tag": "Primary Profile",
         "accent": "#2563EB",
         "badge_bg": "#1E3A8A",
         "badge_fg": "#93C5FD",
     },
     {
-        "name": "User 2",
-        "initial": "2",
+        "name": "Personal",
+        "initial": "P",
         "tag": "Secondary Profile",
         "accent": "#EAB308",
         "badge_bg": "#422006",
@@ -59,12 +61,10 @@ def generate_brand_logo(size=128):
     img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
 
-    # Outer royal-blue rounded squircle base
     pad = int(s * 0.04)
     radius = int(s * 0.26)
     d.rounded_rectangle((pad, pad, s - pad, s - pad), radius=radius, fill="#1D4ED8")
 
-    # Inner deep-navy bezel
     in_pad = int(s * 0.11)
     d.rounded_rectangle(
         (in_pad, in_pad, s - in_pad, s - in_pad),
@@ -74,7 +74,6 @@ def generate_brand_logo(size=128):
         width=int(s * 0.02),
     )
 
-    # Clock dial ring
     ring_pad = int(s * 0.22)
     d.ellipse(
         (ring_pad, ring_pad, s - ring_pad, s - ring_pad),
@@ -82,13 +81,11 @@ def generate_brand_logo(size=128):
         width=int(s * 0.035),
     )
 
-    # Top & right clock tick accents
     cx, cy = s // 2, s // 2
     tick_w = int(s * 0.03)
     d.line([(cx, int(s * 0.17)), (cx, int(s * 0.25))], fill="#FFEE00", width=tick_w)
     d.line([(int(s * 0.75), cy), (int(s * 0.83), cy)], fill="#93C5FD", width=tick_w)
 
-    # Electric yellow pulse / lightning hand in center
     bolt = [
         (int(s * 0.53), int(s * 0.28)),
         (int(s * 0.39), int(s * 0.52)),
@@ -196,8 +193,6 @@ HTML_DASHBOARD = """<!DOCTYPE html>
     --royal: #1D4ED8;
     --royal-soft: #EFF6FF;
     --yellow: #FFEE00;
-    --gold: #CA8A04;
-    --gold-soft: #FEFCE8;
     --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 4px 10px -6px rgba(15, 23, 42, 0.04);
   }
   [data-theme="dark"] {
@@ -210,8 +205,6 @@ HTML_DASHBOARD = """<!DOCTYPE html>
     --royal: #3B82F6;
     --royal-soft: rgba(37, 99, 235, 0.16);
     --yellow: #FFEE00;
-    --gold: #FACC15;
-    --gold-soft: rgba(234, 179, 8, 0.14);
     --shadow: 0 12px 30px -6px rgba(0, 0, 0, 0.45);
   }
   * { box-sizing: border-box; font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; }
@@ -262,7 +255,7 @@ HTML_DASHBOARD = """<!DOCTYPE html>
   .filter-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .seg-btns {
     display: inline-flex; background: var(--surface-2); padding: 4px;
-    border-radius: 10px; border: 1px solid var(--border);
+    border-radius: 10px; border: 1px solid var(--border); flex-wrap: wrap;
   }
   .seg-btn {
     border: none; background: transparent; color: var(--muted);
@@ -281,7 +274,7 @@ HTML_DASHBOARD = """<!DOCTYPE html>
   .quick-date:hover { border-color: var(--royal); }
 
   .kpi-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 18px; margin-bottom: 24px;
   }
   .kpi {
@@ -289,18 +282,10 @@ HTML_DASHBOARD = """<!DOCTYPE html>
     border-radius: 16px; padding: 20px 22px; box-shadow: var(--shadow);
     position: relative; overflow: hidden;
   }
-  .kpi::after {
-    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-    background: var(--royal);
-  }
-  .kpi.u1::after { background: #2563EB; }
-  .kpi.u2::after { background: #FFEE00; }
-  .kpi.total::after { background: linear-gradient(90deg, #2563EB, #FFEE00); }
+  .kpi.total { border-top: 4px solid #1D4ED8; }
   .kpi-head { display: flex; justify-content: space-between; align-items: center; }
   .kpi-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
-  .kpi-tag { font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
-  .tag-a { background: var(--royal-soft); color: var(--royal); }
-  .tag-v { background: var(--gold-soft); color: var(--gold); }
+  .kpi-tag { font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: var(--royal-soft); color: var(--royal); }
   .kpi-value { font-size: 1.95rem; font-weight: 800; margin-top: 10px; letter-spacing: -0.03em; }
   .kpi-sub { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
 
@@ -323,23 +308,19 @@ HTML_DASHBOARD = """<!DOCTYPE html>
   .app-left { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.93rem; }
   .app-icon {
     width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center;
-    font-weight: 800; font-size: 0.8rem;
+    font-weight: 800; font-size: 0.8rem; background: var(--royal-soft); color: var(--royal);
   }
-  .icon-u1 { background: var(--royal-soft); color: var(--royal); }
-  .icon-u2 { background: var(--gold-soft); color: var(--gold); }
   .user-chip {
-    font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+    font-size: 0.72rem; font-weight: 700; padding: 2px 9px; border-radius: 999px;
   }
-  .chip-u1 { background: var(--royal-soft); color: var(--royal); }
-  .chip-u2 { background: var(--gold-soft); color: var(--gold); }
   .app-right { font-size: 0.88rem; font-weight: 700; font-variant-numeric: tabular-nums; }
   .app-pct { color: var(--muted); font-weight: 600; font-size: 0.8rem; margin-left: 6px; }
   .track { height: 10px; background: var(--surface-2); border-radius: 999px; overflow: hidden; border: 1px solid var(--border); }
   .fill { height: 100%; border-radius: 999px; transition: width 0.35s ease; }
 
-  .split-box { display: flex; align-items: center; gap: 22px; margin-bottom: 22px; }
-  .legend { flex: 1; display: flex; flex-direction: column; gap: 12px; }
-  .leg-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: 700; }
+  .split-box { display: flex; align-items: center; gap: 22px; margin-bottom: 8px; }
+  .legend { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .leg-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; font-weight: 700; }
   .leg-dot { width: 11px; height: 11px; border-radius: 3px; display: inline-block; margin-right: 8px; }
 
   .week-bars {
@@ -394,32 +375,7 @@ HTML_DASHBOARD = """<!DOCTYPE html>
     </div>
   </div>
 
-  <div class="kpi-grid">
-    <div class="kpi u1">
-      <div class="kpi-head">
-        <span class="kpi-label" id="u1Label">User 1</span>
-        <span class="kpi-tag tag-a" id="u1Pct">0%</span>
-      </div>
-      <div class="kpi-value" id="u1Total">0m</div>
-      <div class="kpi-sub">Selected date total</div>
-    </div>
-    <div class="kpi u2">
-      <div class="kpi-head">
-        <span class="kpi-label" id="u2Label">User 2</span>
-        <span class="kpi-tag tag-v" id="u2Pct">0%</span>
-      </div>
-      <div class="kpi-value" id="u2Total">0m</div>
-      <div class="kpi-sub">Selected date total</div>
-    </div>
-    <div class="kpi total">
-      <div class="kpi-head">
-        <span class="kpi-label">Combined Screen Time</span>
-        <span class="kpi-tag tag-a" id="appCount">0 apps</span>
-      </div>
-      <div class="kpi-value" id="combinedTotal">0m</div>
-      <div class="kpi-sub" id="topAppLabel">Top app: -</div>
-    </div>
-  </div>
+  <div class="kpi-grid" id="kpiGrid"></div>
 
   <div class="main-grid">
     <div class="card">
@@ -431,21 +387,8 @@ HTML_DASHBOARD = """<!DOCTYPE html>
       <div class="card">
         <h2 class="card-title">Daily Share <span id="shareSubtitle">Profile split</span></h2>
         <div class="split-box">
-          <svg width="116" height="116" viewBox="0 0 36 36">
-            <circle cx="18" cy="18" r="14" fill="none" stroke="#E2E8F0" stroke-width="4.5"></circle>
-            <circle id="ringU2" cx="18" cy="18" r="14" fill="none" stroke="#EAB308" stroke-width="4.5" stroke-dasharray="100 100" transform="rotate(-90 18 18)"></circle>
-            <circle id="ringU1" cx="18" cy="18" r="14" fill="none" stroke="#2563EB" stroke-width="4.5" stroke-dasharray="0 100" transform="rotate(-90 18 18)"></circle>
-          </svg>
-          <div class="legend">
-            <div class="leg-row">
-              <span><i class="leg-dot" style="background:#2563EB;"></i><b id="legU1Name">User 1</b></span>
-              <span id="legU1">0m</span>
-            </div>
-            <div class="leg-row">
-              <span><i class="leg-dot" style="background:#EAB308;"></i><b id="legU2Name">User 2</b></span>
-              <span id="legU2">0m</span>
-            </div>
-          </div>
+          <svg width="116" height="116" viewBox="0 0 36 36" id="shareRing"></svg>
+          <div class="legend" id="shareLegend"></div>
         </div>
       </div>
 
@@ -459,7 +402,7 @@ HTML_DASHBOARD = """<!DOCTYPE html>
 
 <script>
 let selectedUser = 'ALL';
-let configuredUsers = [];
+let tabsInitialized = false;
 const dateInput = document.getElementById('dateFilter');
 dateInput.valueAsDate = new Date();
 
@@ -480,47 +423,17 @@ function setUser(u) {
   document.querySelectorAll('#userTabs .seg-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.user === u);
   });
-  document.getElementById('filterSubtitle').textContent = u === 'ALL' ? 'Showing all users' : `Filtered: ${u}`;
-  loadData();
-}
-
-function setToday() {
-  dateInput.valueAsDate = new Date();
-  loadData();
-}
-
-function shiftDate(days) {
-  const d = new Date(dateInput.value + 'T00:00:00');
-  d.setDate(d.getDate() + days);
-  dateInput.value = d.toISOString().split('T')[0];
-  loadData();
-}
-
-function fmt(sec) {
-  const h = Math.floor(sec / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = sec % 60;
-  if (h > 0) return `${h}h ${m}m`;
-  if (m > 0) return `${m}m ${s}s`;
-  return `${s}s`;
+  document.getElementById('filterSubtitle').textContent = u === 'ALL' ? 'Showing all users' : `Filtered: ${u}`; loadData(); }  function setToday() { dateInput.valueAsDate = new Date(); loadData(); }  function shiftDate(days) { const d = new Date(dateInput.value + 'T00:00:00'); d.setDate(d.getDate() + days); dateInput.value = d.toISOString().split('T')[0]; loadData(); }  function fmt(sec) { const h = Math.floor(sec / 3600); const m = Math.floor((sec % 3600) / 60); const s = sec % 60; if (h > 0) return `${h}h ${m}m`; if (m > 0) return `${m}m ${s}s`; return `${s}s`;
 }
 
 function initTabs(users) {
-  if (configuredUsers.length) return;
-  configuredUsers = users;
+  if (tabsInitialized) return;
+  tabsInitialized = true;
+  const names = users.map(u => u.name);
   const tabs = document.getElementById('userTabs');
-  tabs.innerHTML = `<button class="seg-btn active" data-user="ALL" onclick="setUser('ALL')">Both Users</button>` +
-    users.map(u => `<button class="seg-btn" data-user="${u}" onclick="setUser('${u}')">${u}</button>`).join('');
-  document.getElementById('brandSub').textContent = `Date-Wise Screen Telemetry · ${users.join(' & ')}`;
-  document.getElementById('shareSubtitle').textContent = users.join(' vs ');
-  if (users[0]) {
-    document.getElementById('u1Label').textContent = users[0];
-    document.getElementById('legU1Name').textContent = users[0];
-  }
-  if (users[1]) {
-    document.getElementById('u2Label').textContent = users[1];
-    document.getElementById('legU2Name').textContent = users[1];
-  }
+  tabs.innerHTML = `<button class="seg-btn active" data-user="ALL" onclick="setUser('ALL')">All Users</button>` +
+    names.map(name => `<button class="seg-btn" data-user="${name}" onclick="setUser('${name}')">${name}</button>`).join('');
+  document.getElementById('brandSub').textContent = `Date-Wise Screen Telemetry · ${names.join(' · ')}`; document.getElementById('shareSubtitle').textContent = `${names.length} profiles`;
 }
 
 async function loadData() {
@@ -529,36 +442,62 @@ async function loadData() {
   const data = await res.json();
 
   initTabs(data.configured_users);
-  const u1 = data.configured_users[0] || 'User 1';
-  const u2 = data.configured_users[1] || 'User 2';
+  const colorMap = {};
+  data.configured_users.forEach(u => { colorMap[u.name] = u.accent; });
 
   const isLive = data.current_user && !data.current_app.includes('Paused');
   document.getElementById('liveDot').className = isLive ? 'dot' : 'dot paused';
-  document.getElementById('liveStatus').textContent = data.current_user ? `User: ${data.current_user}` : 'No user selected';
-  document.getElementById('liveApp').textContent = `App: ${data.current_app}`;
+  document.getElementById('liveStatus').textContent = data.current_user ? `User: ${data.current_user}` : 'No user selected'; document.getElementById('liveApp').textContent = `App: ${data.current_app}`;
 
-  const u1Sec = data.user_totals[u1] || 0;
-  const u2Sec = data.user_totals[u2] || 0;
-  const tot = u1Sec + u2Sec;
+  const tot = Object.values(data.user_totals).reduce((sum, s) => sum + s, 0);
 
-  const u1Share = tot > 0 ? Math.round((u1Sec / tot) * 100) : 0;
-  const u2Share = tot > 0 ? 100 - u1Share : 0;
+  // Dynamic KPI Cards for all configured users
+  document.getElementById('kpiGrid').innerHTML = data.configured_users.map(u => {
+    const sec = data.user_totals[u.name] || 0;
+    const share = tot > 0 ? Math.round((sec / tot) * 100) : 0;
+    return `
+      <div class="kpi" style="border-top: 4px solid ${u.accent};">
+        <div class="kpi-head">
+          <span class="kpi-label">${u.name}</span>
+          <span class="kpi-tag">${share}%</span>
+        </div>
+        <div class="kpi-value">${fmt(sec)}</div>
+        <div class="kpi-sub">Selected date total</div>
+      </div>`;
+  }).join('') + `
+    <div class="kpi total">
+      <div class="kpi-head">
+        <span class="kpi-label">Combined Screen Time</span>
+        <span class="kpi-tag">${data.apps.length} apps</span>
+      </div>
+      <div class="kpi-value">${fmt(tot)}</div>
+      <div class="kpi-sub">${data.apps.length ? 'Top app: ' + data.apps[0].app_name : 'Top app: -'}</div>
+    </div>`;
 
-  document.getElementById('u1Total').textContent = fmt(u1Sec);
-  document.getElementById('u2Total').textContent = fmt(u2Sec);
-  document.getElementById('combinedTotal').textContent = fmt(tot);
-  document.getElementById('u1Pct').textContent = `${u1Share}%`;
-  document.getElementById('u2Pct').textContent = `${u2Share}%`;
-  document.getElementById('legU1').textContent = `${fmt(u1Sec)} (${u1Share}%)`;
-  document.getElementById('legU2').textContent = `${fmt(u2Sec)} (${u2Share}%)`;
-
+  // Dynamic Multi-User SVG Ring & Legend
   const circumference = 87.96;
-  document.getElementById('ringU1').setAttribute('stroke-dasharray', `${(u1Share / 100) * circumference} ${circumference}`);
-  document.getElementById('ringU2').setAttribute('stroke-dasharray', tot > 0 ? `${circumference} ${circumference}` : `0 ${circumference}`);
+  let offsetAcc = 0;
+  let ringCircles = `<circle cx="18" cy="18" r="14" fill="none" stroke="#E2E8F0" stroke-width="4.5"></circle>`;
+  let legendHtml = '';
 
-  document.getElementById('appCount').textContent = `${data.apps.length} apps`;
-  document.getElementById('topAppLabel').textContent = data.apps.length ? `Top app: ${data.apps[0].app_name}` : 'Top app: -';
+  data.configured_users.forEach(u => {
+    const sec = data.user_totals[u.name] || 0;
+    const share = tot > 0 ? Math.round((sec / tot) * 100) : 0;
+    const dash = tot > 0 ? (sec / tot) * circumference : 0;
+    if (dash > 0) {
+      ringCircles += `<circle cx="18" cy="18" r="14" fill="none" stroke="${u.accent}" stroke-width="4.5" stroke-dasharray="${dash} ${circumference}" stroke-dashoffset="${-offsetAcc}" transform="rotate(-90 18 18)"></circle>`;
+      offsetAcc += dash;
+    }
+    legendHtml += `
+      <div class="leg-row">
+        <span><i class="leg-dot" style="background:${u.accent};"></i>${u.name}</span>
+        <span>${fmt(sec)} (${share}%)</span>
+      </div>`;
+  });
+  document.getElementById('shareRing').innerHTML = ringCircles;
+  document.getElementById('shareLegend').innerHTML = legendHtml;
 
+  // Application Breakdown List
   const list = document.getElementById('appList');
   if (!data.apps.length) {
     list.innerHTML = '<div class="empty">No application usage logged for this date.</div>';
@@ -566,19 +505,17 @@ async function loadData() {
     const filteredTotal = data.apps.reduce((sum, x) => sum + x.seconds, 0) || 1;
     const maxSec = data.apps[0].seconds || 1;
     list.innerHTML = data.apps.map(a => {
-      const isSecondUser = a.user_name === u2;
       const barPct = Math.max(4, Math.round((a.seconds / maxSec) * 100));
       const sharePct = Math.max(1, Math.round((a.seconds / filteredTotal) * 100));
-      const color = isSecondUser ? '#EAB308' : '#2563EB';
-      const cls = isSecondUser ? 'u2' : 'u1';
+      const color = colorMap[a.user_name] || '#2563EB';
       const initial = a.app_name.charAt(0).toUpperCase();
       return `
         <div class="app-item">
           <div class="app-top">
             <div class="app-left">
-              <div class="app-icon icon-${cls}">${initial}</div>
+              <div class="app-icon" style="background:${color}22; color:${color};">${initial}</div>
               <span>${a.app_name}</span>
-              <span class="user-chip chip-${cls}">${a.user_name}</span>
+              <span class="user-chip" style="background:${color}22; color:${color};">${a.user_name}</span>
             </div>
             <div class="app-right">${fmt(a.seconds)}<span class="app-pct">(${sharePct}%)</span></div>
           </div>
@@ -587,6 +524,7 @@ async function loadData() {
     }).join('');
   }
 
+  // 7-Day Trend
   const weekDiv = document.getElementById('weekBars');
   const maxWeek = Math.max(1, ...data.week.map(w => w.seconds));
   weekDiv.innerHTML = data.week.map(w => {
@@ -669,7 +607,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             conn.close()
 
             payload = {
-                "configured_users": [u["name"] for u in USERS],
+                "configured_users": [{"name": u["name"], "accent": u["accent"]} for u in USERS],
                 "current_user": CURRENT_USER,
                 "current_app": CURRENT_APP,
                 "user_totals": user_totals,
@@ -773,7 +711,9 @@ class ChronoPulseApp:
             w.destroy()
 
         self.root.attributes("-topmost", True)
-        self.center_window(416, 332)
+        # Automatically adjusts window height for any number of configured users
+        popup_height = 176 + (len(USERS) * 78)
+        self.center_window(416, popup_height)
 
         outer = tk.Frame(self.root, bg="#0B1120", highlightbackground="#2563EB", highlightthickness=1)
         outer.pack(fill="both", expand=True)
