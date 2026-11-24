@@ -1,4 +1,4 @@
-<img width="1280" height="640" alt="choronopuls-social-banner" src="https://github.com/user-attachments/assets/98cbb29c-8d97-4caf-a178-4d94c794cce7" />
+<img width="1280" height="640" alt="choronopulse-social-banner" src="https://github.com/user-attachments/assets/7a108e65-dc84-4ea2-b7d5-281e6066fa0a" />
 
 # ChronoPulse for Windows
 
