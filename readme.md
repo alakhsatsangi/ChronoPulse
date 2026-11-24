@@ -1,3 +1,5 @@
+<img width="1280" height="640" alt="choronopuls-social-banner" src="https://github.com/user-attachments/assets/98cbb29c-8d97-4caf-a178-4d94c794cce7" />
+
 # ChronoPulse for Windows
 
 A lightweight, offline-first Windows desktop screen-time tracker and multi-profile telemetry dashboard built in Python.
